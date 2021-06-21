@@ -4,6 +4,8 @@ from .serializers import CheeseSerializer, UserSerializer, ReviewSerializer, Rat
 from .permissions import IsOwnerOrReadOnly
 from rest_framework import permissions
 from django.contrib.auth.models import User
+from rest_framework.exceptions import PermissionDenied
+from rest_framework.response import Response
 
 class CheeseViewSet(viewsets.ModelViewSet):
     """
@@ -32,6 +34,14 @@ class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        print(request.data)
+        if Review.objects.filter(owner = self.request.user, cheese__id=request.data.get('cheese')).exists():
+            raise PermissionDenied()
+        return Response()
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
