@@ -16,16 +16,18 @@ class RatingSerializer(serializers.ModelSerializer):
         model = Rating
         fields = ['url', 'id', 'review', 'vote', 'owner']
 
+class Upvotes(serializers.RelatedField):
+    def to_representation(self, value):
+        return value.vote
+
 class ReviewSerializer(serializers.ModelSerializer):
     owner = UserSerializer(read_only=True)
-    ratings = serializers.SerializerMethodField()
+    # ratings = RatingSerializer(many=True, read_only=True)
+    ratings = Upvotes(many=True, read_only=True)
 
     class Meta:
         model = Review
         fields = ['url', 'id', 'cheese', 'content', 'score', 'owner', 'ratings']
-
-    def get_ratings(self, obj):
-        return obj.ratings
 
 
 class CheeseSerializer(serializers.ModelSerializer):
