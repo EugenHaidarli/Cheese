@@ -30,7 +30,7 @@ class Review(models.Model):
     score = models.CharField("Review Score", max_length=20, choices=ReviewScore.choices, default=ReviewScore.UNSPECIFIED)
 
 class Rating(models.Model):
-    review = models.ForeignKey(Review, on_delete=models.CASCADE, related_name='reviews')
+    review = models.ForeignKey(Review, on_delete=models.CASCADE, related_name='ratings')
     owner = models.ForeignKey('auth.User', null=True, related_name='ratings', on_delete=models.CASCADE)
 
     class Vote(models.IntegerChoices):
