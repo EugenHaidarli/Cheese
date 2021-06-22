@@ -23,11 +23,20 @@ class Upvotes(serializers.RelatedField):
 class ReviewSerializer(serializers.ModelSerializer):
     owner = UserSerializer(read_only=True)
     # ratings = RatingSerializer(many=True, read_only=True)
-    ratings = Upvotes(many=True, read_only=True)
+    # ratings = Upvotes(many=True, read_only=True)
+    rating_score = serializers.SerializerMethodField()
+
+    def get_rating_score(self, review):
+        return {
+            "upvotes": review.ratings.filter(vote='1').count(), 
+            "downvotes": review.ratings.filter(vote='-1').count()
+        }
+
+
 
     class Meta:
         model = Review
-        fields = ['url', 'id', 'cheese', 'content', 'score', 'owner', 'ratings']
+        fields = ['url', 'id', 'cheese', 'content', 'score', 'owner', 'rating_score']
 
 
 class CheeseSerializer(serializers.ModelSerializer):
