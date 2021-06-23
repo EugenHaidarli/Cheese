@@ -1,10 +1,12 @@
 from django.db import models
+from .managers import CheeseManager
 
 class Cheese(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
     owner = models.ForeignKey('auth.User', null=True, related_name='cheeses', on_delete=models.CASCADE)
-
+    objects = CheeseManager()
+    
     class Firmness(models.TextChoices): 
         UNSPECIFIED = "unspecified", "Unspecified" 
         SOFT = "soft", "Soft" 
