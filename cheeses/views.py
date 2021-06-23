@@ -1,6 +1,6 @@
 from cheeses.models import Cheese, Review, Rating
 from rest_framework import serializers, viewsets
-from .serializers import CheeseSerializer, UserSerializer, ReviewSerializer, RatingSerializer
+from .serializers import CheeseSerializer, UserCheeseSerializer, UserReviewSerializer, ReviewSerializer, RatingSerializer
 from .permissions import IsOwnerOrReadOnly
 from rest_framework import permissions
 from django.contrib.auth.models import User
@@ -25,7 +25,7 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     This viewset automatically provides `list` and `retrieve` actions.
     """
     queryset = User.objects.all()
-    serializer_class = UserSerializer
+    serializer_class = UserCheeseSerializer, UserReviewSerializer
 
 class ReviewViewSet(viewsets.ModelViewSet):
     """
