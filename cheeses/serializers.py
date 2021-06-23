@@ -1,4 +1,3 @@
-from re import A
 from rest_framework import serializers
 from .models import Cheese, Review, Rating
 from django.contrib.auth.models import User
