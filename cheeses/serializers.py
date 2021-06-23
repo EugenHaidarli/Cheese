@@ -3,23 +3,29 @@ from rest_framework import serializers
 from .models import Cheese, Review, Rating
 from django.contrib.auth.models import User
 
-class UserSerializer(serializers.ModelSerializer):
-    # cheeses = serializers.HyperlinkedRelatedField(many=True, view_name='cheese-detail', read_only=True)
-    cheeses = serializers.SerializerMethodField()
-    reviews = serializers.SerializerMethodField()
+class UserCheeseSerializer(serializers.ModelSerializer):
+    cheese_count = serializers.SerializerMethodField()
 
-    def get_cheeses(self, cheese):
+    def get_cheese_count(self, cheese):
         return cheese.cheeses.count()
-
-    def get_reviews(self, review):
-        return review.reviews.count()
 
     class Meta:
         model = User
-        fields = ['url', 'id', 'username', 'cheeses', 'reviews']
+        fields = ['url', 'id', 'username', 'cheese_count']
+
+
+class UserReviewSerializer(serializers.ModelSerializer):
+    review_count = serializers.SerializerMethodField()
+
+    def get_review_count(self, cheese):
+        return cheese.reviews.count()
+
+    class Meta:
+        model = User
+        fields = ['url', 'id', 'username', 'review_count']
 
 class RatingSerializer(serializers.ModelSerializer):
-    owner = UserSerializer(read_only=True)
+    owner = UserReviewSerializer(read_only=True)
 
     class Meta:
         model = Rating
@@ -30,7 +36,7 @@ class Upvotes(serializers.RelatedField):
         return value.vote
 
 class ReviewSerializer(serializers.ModelSerializer):
-    owner = UserSerializer(read_only=True)
+    owner = UserReviewSerializer(read_only=True)
     rating_score = serializers.SerializerMethodField()
 
     def get_rating_score(self, review):
@@ -45,7 +51,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 
 class CheeseSerializer(serializers.ModelSerializer):
-    owner = UserSerializer(read_only=True)
+    owner = UserCheeseSerializer(read_only=True)
     reviews = ReviewSerializer(many=True, read_only=True)
 
     class Meta:
