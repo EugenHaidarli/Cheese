@@ -5,7 +5,7 @@ class CheeseQuerySet(models.QuerySet):
         return self.filter(owner__username=username)
     
     def get_top_cheese(self, size):
-        return self.filter(reviews__gt=size)
+        return self.order_by('-reviews')
 
     def test(self):
         return self.filter(reviews__cheese=2)
