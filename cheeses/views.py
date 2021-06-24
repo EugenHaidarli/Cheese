@@ -2,7 +2,7 @@ from cheeses.models import Cheese, Review, Rating
 from rest_framework import serializers, viewsets
 from .serializers import CheeseSerializer, UserCheeseSerializer, UserReviewSerializer, ReviewSerializer, RatingSerializer
 from .permissions import IsOwnerOrReadOnly
-from rest_framework import permissions
+from rest_framework import permissions, status
 from django.contrib.auth.models import User
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
@@ -38,10 +38,13 @@ class ReviewViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        print(request.data)
         if Review.objects.filter(owner = self.request.user, cheese__id=request.data.get('cheese')).exists():
             raise PermissionDenied()
-        return Response()
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(
+            serializer.data, status=status.HTTP_201_CREATED, headers=headers
+        )
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
@@ -53,6 +56,17 @@ class RatingViewSet(viewsets.ModelViewSet):
     queryset = Rating.objects.all()
     serializer_class = RatingSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        if Rating.objects.filter(owner = self.request.user, review__id=request.data.get('review')).exists():
+            raise PermissionDenied()
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(
+            serializer.data, status=status.HTTP_201_CREATED, headers=headers
+        )
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
