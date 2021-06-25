@@ -1,5 +1,5 @@
 from django.db import models
-from .managers import CheeseManager
+from .managers import CheeseManager, ReviewManager
 
 class Cheese(models.Model):
     name = models.CharField(max_length=100)
@@ -20,6 +20,7 @@ class Review(models.Model):
     cheese = models.ForeignKey(Cheese, on_delete=models.CASCADE, related_name='reviews')
     content = models.TextField(max_length=1000, blank=True)
     owner = models.ForeignKey('auth.User', null=True, related_name='reviews', on_delete=models.CASCADE)
+    objects = ReviewManager()
 
     class ReviewScore(models.TextChoices): 
         UNSPECIFIED = "unspecified", "Unspecified" 
