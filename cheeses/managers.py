@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models import Count
+from django.db.models import Count, Sum
 
 class CheeseQuerySet(models.QuerySet):
     def get_cheeses_for_users(self, users):
@@ -15,8 +15,11 @@ class CheeseManager(models.Manager):
     def get_cheeses_for_users(self, users):
         return self.get_queryset().get_cheeses_for_users(users)
 
-    def get_top_cheese(self, size):
+    def get_top_cheese(self, size=5):
         return self.get_queryset().get_top_cheese(size)
+
+
+
 
 class ReviewQuerySet(models.QuerySet):
     def get_reviews_for_score(self, score):
@@ -26,7 +29,13 @@ class ReviewQuerySet(models.QuerySet):
         return self.filter(content__icontains=string)
 
     def get_top_review(self, cheese):
-        return self.filter(cheese__name=cheese).annotate(ratings_count=Count('ratings__vote' == 1)).order_by('-ratings_count')[:1]
+        return self.filter(cheese__name=cheese).annotate(ratings_sum=Sum('ratings__vote')).order_by('-ratings_sum').first()
+
+    def get_lowest_review(self, cheese):
+        return self.filter(cheese__name=cheese).annotate(ratings_sum=Sum('ratings__vote')).order_by('ratings_sum').first()
+
+    def get_top_reviews(self, size=5):
+        return self.all().annotate(upvotes=Sum('ratings__vote')).order_by('-upvotes')[:size]
 
 class ReviewManager(models.Manager):
     def get_queryset(self):
@@ -40,3 +49,9 @@ class ReviewManager(models.Manager):
 
     def get_top_review(self, cheese):
         return self.get_queryset().get_top_review(cheese)
+
+    def get_lowest_review(self, cheese):
+        return self.get_queryset().get_lowest_review(cheese)
+
+    def get_top_reviews(self, size=5):
+        return self.get_queryset().get_top_reviews(size)
